@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source_app="$source_dir/ram_relief.py"
+installed_app="${XDG_DATA_HOME:-$HOME/.local/share}/ram-relief/ram_relief.py"
+
+if [[ -f "$source_app" ]]; then
+  exec /usr/bin/python3 "$source_app" "$@"
+fi
+
+exec /usr/bin/python3 "$installed_app" "$@"

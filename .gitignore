@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Browser prototype dependencies and output
+ui-sandbox/node_modules/
+ui-sandbox/dist/
+ui-sandbox/coverage/
+ui-sandbox/.vite/
+
+# Runtime, local configuration, and logs
+.env
+.env.*
+!.env.example
+*.log
+*.pid
+*.sock
+settings.local.*
+state/
+cache/
+history/
+
+# Licensed source material is never part of the source backup
+licensed-source/
+assets/source/
+*.blend
+*.fbx
+*.glb
+
+# Packaging/editor output
+build/
+dist/
+*.egg-info/
+*.swp
+.DS_Store
+.idea/
+.vscode/

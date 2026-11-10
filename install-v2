@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+data_root="${XDG_DATA_HOME:-$HOME/.local/share}/ram-relief"
+config_root="${XDG_CONFIG_HOME:-$HOME/.config}/ram-relief"
+systemd_root="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+release_root="$data_root/releases/2.0.0"
+icon_theme_root="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor"
+icon_root="$icon_theme_root/512x512/apps"
+
+install -d -m 755 "$data_root" "$data_root/assets/actions" "$release_root/assets/actions" "$HOME/.local/bin" "$HOME/.local/share/applications" "$systemd_root" "$icon_root"
+install -d -m 700 "$config_root"
+install -m 755 "$source_dir/ram_relief.py" "$data_root/ram_relief.py"
+install -m 644 "$source_dir/ram_relief_core.py" "$data_root/ram_relief_core.py"
+install -m 644 "$source_dir/ram_relief_cleanup.py" "$data_root/ram_relief_cleanup.py"
+install -m 644 "$source_dir/ram_relief_ui.py" "$data_root/ram_relief_ui.py"
+install -m 644 "$source_dir/style.css" "$data_root/style.css"
+install -m 644 "$source_dir/VERSION" "$data_root/VERSION"
+install -m 644 "$source_dir/assets/ram-relief-icon.png" "$data_root/ram-relief-icon.png"
+install -m 644 "$source_dir/assets/actions/README.md" "$data_root/assets/actions/README.md"
+for action in overview memory cleanup; do
+  install -d -m 755 "$data_root/assets/actions/$action"
+  assets=("$source_dir/assets/actions/$action"/*.webp)
+  if [[ ! -e "${assets[0]}" ]]; then
+    echo "Missing flattened $action artwork; refusing an incomplete install." >&2
+    exit 1
+  fi
+  for asset in "${assets[@]}"; do
+    install -m 644 "$asset" "$data_root/assets/actions/$action/$(basename -- "$asset")"
+  done
+done
+install -m 755 "$source_dir/ram_relief.py" "$release_root/ram_relief.py"
+install -m 644 "$source_dir/ram_relief_core.py" "$release_root/ram_relief_core.py"
+install -m 644 "$source_dir/ram_relief_cleanup.py" "$release_root/ram_relief_cleanup.py"
+install -m 644 "$source_dir/ram_relief_ui.py" "$release_root/ram_relief_ui.py"
+install -m 644 "$source_dir/style.css" "$release_root/style.css"
+install -m 644 "$source_dir/VERSION" "$release_root/VERSION"
+install -m 644 "$source_dir/assets/ram-relief-icon.png" "$release_root/ram-relief-icon.png"
+install -m 644 "$source_dir/assets/actions/README.md" "$release_root/assets/actions/README.md"
+for action in overview memory cleanup; do
+  install -d -m 755 "$release_root/assets/actions/$action"
+  for asset in "$source_dir/assets/actions/$action"/*.webp; do
+    install -m 644 "$asset" "$release_root/assets/actions/$action/$(basename -- "$asset")"
+  done
+done
+install -m 755 "$source_dir/ram-relief" "$HOME/.local/bin/ram-relief"
+install -m 644 "$source_dir/ram-relief.desktop" "$HOME/.local/share/applications/ram-relief.desktop"
+install -m 644 "$source_dir/assets/ram-relief-icon.png" "$icon_root/ram-relief.png"
+install -m 644 "$source_dir/systemd/ram-relief.service" "$systemd_root/ram-relief.service"
+install -m 644 "$source_dir/systemd/ram-relief.timer" "$systemd_root/ram-relief.timer"
+
+systemctl --user daemon-reload
+if /usr/bin/python3 -c 'import json,pathlib,sys; p=(pathlib.Path.home()/".config/ram-relief/settings.json"); d=json.loads(p.read_text()) if p.exists() else {}; sys.exit(0 if d.get("schema_version") == 2 and d.get("setup_complete") and d.get("memory_mode") == "pressure-aware" else 1)'; then
+  systemctl --user enable --now ram-relief.timer
+else
+  systemctl --user disable --now ram-relief.timer >/dev/null 2>&1 || true
+fi
+update-desktop-database "$HOME/.local/share/applications" >/dev/null 2>&1 || true
+gtk-update-icon-cache -f -t "$icon_theme_root" >/dev/null 2>&1 || true
+
+echo "RAM Relief 2.0.0 installed. Open the app to complete the migration setup."

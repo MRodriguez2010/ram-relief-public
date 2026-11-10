@@ -1,0 +1,16 @@
+[Unit]
+Description=RAM Relief pressure-aware memory parking check
+Documentation=https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/ram-relief --auto-run
+Nice=10
+IOSchedulingClass=idle
+CPUWeight=10
+IOWeight=10
+NoNewPrivileges=yes
+LockPersonality=yes
+RestrictSUIDSGID=yes
+PrivateTmp=yes

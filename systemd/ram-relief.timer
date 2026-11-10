@@ -1,0 +1,12 @@
+[Unit]
+Description=Check for safe RAM Relief opportunities every two minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+AccuracySec=15s
+Persistent=false
+Unit=ram-relief.service
+
+[Install]
+WantedBy=timers.target

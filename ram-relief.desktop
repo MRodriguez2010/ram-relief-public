@@ -1,0 +1,17 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=RAM Relief
+GenericName=Memory & Storage Care
+Comment=Park idle app memory and clean approved stale files without closing applications
+Exec=ram-relief
+Icon=ram-relief
+Terminal=false
+Categories=System;
+Keywords=RAM;Memory;Swap;Cleanup;Performance;System;Relief;
+StartupNotify=true
+Actions=Configure;
+
+[Desktop Action Configure]
+Name=Open Settings
+Exec=ram-relief --configure
